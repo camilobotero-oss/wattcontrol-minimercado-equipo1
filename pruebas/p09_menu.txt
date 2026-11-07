@@ -1,0 +1,46 @@
+Minimercado El Ahorro | potencia contratada: 7.0 kW
+  Refrigeradores (2.5 kW, critica)
+  Aire acondicionado (3.5 kW, aplazable)
+  Calentador de agua (2.0 kW, aplazable)
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 4
+Primero simule un dia con la opcion 3.
+
+Presione Enter para continuar...
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 9
+Opcion invalida.
+
+Presione Enter para continuar...
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: x
+Opcion invalida.
+
+Presione Enter para continuar...
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 0
+Hasta luego.
