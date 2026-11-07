@@ -182,15 +182,85 @@ public:
     int getHorasMinimas() override { return horasMinimas; }
 };
 
-// Prueba de las cargas: la misma pregunta, dos respuestas distintas
-int main() {
-    CargaCritica refrigeradores("Refrigeradores", POTENCIA_REFRIGERADORES);
-    CargaAplazable aire("Aire acondicionado", POTENCIA_AIRE, HORAS_MIN_AIRE);
-    CargaAplazable calentador("Calentador de agua", POTENCIA_CALENTADOR, HORAS_MIN_CALENTADOR);
-    Carga* cargas[] = {&refrigeradores, &aire, &calentador};
+// =============================================================
+// Medidor: parte del Negocio (COMPOSICION). Acumula kWh y costo
+// =============================================================
+class Medidor {
+private:
+    // Lo que gasta el negocio con el gestor
+    float kwhConGestor, costoConGestor;
+    // Lo que gastaria en esas mismas horas sin el gestor
+    float kwhSinGestor, costoSinGestor;
 
-    for (Carga* carga : cargas) {
-        cout << carga->getNombre() << " a las 19 h: " << carga->debeEncender(19, 500, EMBALSES_INICIAL) << endl;
+public:
+    Medidor() { reiniciar(); }
+
+    void reiniciar() {
+        kwhConGestor = 0; costoConGestor = 0;
+        kwhSinGestor = 0; costoSinGestor = 0;
     }
+
+    // Suma una hora: los kW encendidos durante 1 h son kWh; el costo es kWh x precio
+    void registrarConGestor(float kwEncendidos, float precio) {
+        kwhConGestor += kwEncendidos;
+        costoConGestor += kwEncendidos * precio;
+    }
+
+    void registrarSinGestor(float kwTotales, float precio) {
+        kwhSinGestor += kwTotales;
+        costoSinGestor += kwTotales * precio;
+    }
+
+    float getKwhConGestor() { return kwhConGestor; }
+    float getCostoConGestor() { return costoConGestor; }
+    float getKwhSinGestor() { return kwhSinGestor; }
+    float getCostoSinGestor() { return costoSinGestor; }
+};
+
+// =============================================================
+// Mercado: da el precio de cada hora y el nivel de los embalses (ASOCIACION)
+// =============================================================
+class Mercado {
+private:
+    // % de los embalses del pais
+    float nivelEmbalses;
+
+public:
+    Mercado(float nivelInicial) {
+        nivelEmbalses = nivelInicial;
+    }
+
+    // Precio al azar dentro del rango real de la franja de esta hora
+    float precioHora(int hora) {
+        // Busca la primera franja que contiene la hora
+        int franja = 0;
+        while (hora > FRANJA_HORA_FIN[franja]) {
+            franja++;
+        }
+        int minimo = FRANJA_PRECIO_MIN[franja];
+        int maximo = FRANJA_PRECIO_MAX[franja];
+        // rand() % (maximo - minimo + 1) da de 0 a la diferencia; sumado al minimo,
+        // el precio queda entre minimo y maximo
+        return minimo + rand() % (maximo - minimo + 1);
+    }
+
+    float getNivelEmbalses() { return nivelEmbalses; }
+
+    // La opcion 1 actualiza el dato: asi se pueden simular dias de embalses bajos
+    void setNivelEmbalses(float nivel) { nivelEmbalses = nivel; }
+};
+
+// Prueba del mercado y del medidor
+int main() {
+    srand(SEMILLA);
+    Mercado mercado(EMBALSES_INICIAL);
+    Medidor medidor;
+
+    for (int h = 0; h < HORAS_DIA; h++) {
+        float precio = mercado.precioHora(h);
+        medidor.registrarSinGestor(POTENCIA_REFRIGERADORES, precio);
+        cout << h << " h: " << precio << endl;
+    }
+    cout << "Costo de los refrigeradores: " << medidor.getCostoSinGestor() << endl;
     return 0;
 }
