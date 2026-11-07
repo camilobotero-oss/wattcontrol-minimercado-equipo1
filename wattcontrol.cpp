@@ -250,17 +250,316 @@ public:
     void setNivelEmbalses(float nivel) { nivelEmbalses = nivel; }
 };
 
-// Prueba del mercado y del medidor
+// =============================================================
+// Negocio: reune todo y simula el dia
+// =============================================================
+class Negocio {
+private:
+    string nombre;
+    // COMPOSICION: el medidor es un atributo objeto. Nace y muere con el negocio
+    Medidor medidor;
+    // AGREGACION: arreglo de punteros. Las cargas se crean afuera y aqui se guarda su direccion
+    Carga* cargas[MAX_CARGAS];
+    int numCargas;
+    // ASOCIACION: el negocio no crea el mercado; solo lo conoce y le pide datos
+    Mercado* mercado;
+
+    // Resultados de la ultima simulacion, para el resumen (opcion 4)
+    int horasSimuladas, fallas, alertasPotencia, turnosCedidos;
+    bool emergencia;
+    int horaEmergencia;
+
+    // kW de todas las cargas: lo que consume el negocio sin gestor
+    float potenciaInstalada() {
+        float total = 0;
+        for (int i = 0; i < numCargas; i++) {
+            total += cargas[i]->getPotencia();
+        }
+        return total;
+    }
+
+    // kW de las cargas encendidas en este momento
+    float potenciaEncendida() {
+        float total = 0;
+        for (int i = 0; i < numCargas; i++) {
+            if (cargas[i]->estaEncendida()) total += cargas[i]->getPotencia();
+        }
+        return total;
+    }
+
+    // POLIMORFISMO: el mismo ciclo le pregunta a todas las cargas; cada una usa su regla
+    void decidirCargas(int hora, float precio, float embalses) {
+        for (int i = 0; i < numCargas; i++) {
+            if (cargas[i]->debeEncender(hora, precio, embalses)) {
+                cargas[i]->encender();
+            } else {
+                cargas[i]->apagar();
+            }
+        }
+    }
+
+    // continue: sin precio no se decide nada; solo sigue lo que no es aplazable
+    void dejarSoloCritica() {
+        for (int i = 0; i < numCargas; i++) {
+            if (cargas[i]->esAplazable()) {
+                cargas[i]->apagar();
+            } else {
+                cargas[i]->encender();
+            }
+        }
+    }
+
+    // Turno por horas minimas (decision del equipo, explicada en el PDF).
+    // Las tres cargas suman mas que la potencia contratada, asi que las dos aplazables
+    // nunca caben juntas. Si la regla 6 actuara sola, apagaria siempre la mayor y esa carga
+    // nunca funcionaria. Por eso, antes de la regla 6, la aplazable que ya cumplio sus horas
+    // cede el turno a la que todavia no. Devuelve la carga que cedio, o nullptr si ninguna
+    Carga* cederTurno() {
+        if (potenciaEncendida() <= POTENCIA_CONTRATADA) return nullptr;
+
+        // Hay alguna aplazable encendida a la que le falten horas?
+        bool hayPendiente = false;
+        for (int i = 0; i < numCargas; i++) {
+            if (cargas[i]->estaEncendida() && cargas[i]->faltanHoras()) hayPendiente = true;
+        }
+        if (!hayPendiente) return nullptr;
+
+        for (int i = 0; i < numCargas; i++) {
+            if (cargas[i]->esAplazable() && cargas[i]->estaEncendida() && !cargas[i]->faltanHoras()) {
+                cargas[i]->apagar();
+                return cargas[i];
+            }
+        }
+        return nullptr;
+    }
+
+    // Regla 6: si se supera la potencia contratada, apaga la aplazable de mayor potencia.
+    // Devuelve la carga que apago, o nullptr si no hizo falta
+    Carga* aplicarRegla6() {
+        if (potenciaEncendida() <= POTENCIA_CONTRATADA) return nullptr;
+
+        Carga* mayor = nullptr;
+        for (int i = 0; i < numCargas; i++) {
+            if (cargas[i]->esAplazable() && cargas[i]->estaEncendida()) {
+                if (mayor == nullptr || cargas[i]->getPotencia() > mayor->getPotencia()) {
+                    mayor = cargas[i];
+                }
+            }
+        }
+        if (mayor != nullptr) mayor->apagar();
+        return mayor;
+    }
+
+    // Cierra la hora: cuenta las horas de uso y el Medidor acumula con y sin gestor.
+    // Devuelve el costo de esta hora con gestor
+    float cerrarHora(float precio) {
+        for (int i = 0; i < numCargas; i++) {
+            cargas[i]->registrarHora();
+        }
+        float kwEncendidos = potenciaEncendida();
+        medidor.registrarConGestor(kwEncendidos, precio);
+        medidor.registrarSinGestor(potenciaInstalada(), precio);
+        horasSimuladas++;
+        return kwEncendidos * precio;
+    }
+
+    // Muestra la alerta de cada aplazable que no cumplio sus horas minimas
+    void mostrarProduccionIncompleta() {
+        for (int i = 0; i < numCargas; i++) {
+            if (cargas[i]->faltanHoras()) {
+                cout << "ALERTA: produccion incompleta - " << cargas[i]->getNombre() << ": "
+                     << cargas[i]->getHorasUso() << " h de " << cargas[i]->getHorasMinimas()
+                     << " h minimas" << endl;
+            }
+        }
+    }
+
+public:
+    // ": medidor()" crea el medidor junto con el negocio (composicion)
+    Negocio(string n, Mercado* m) : medidor() {
+        nombre = n;
+        mercado = m;
+        numCargas = 0;
+        horasSimuladas = 0; fallas = 0; alertasPotencia = 0; turnosCedidos = 0;
+        emergencia = false;
+        horaEmergencia = 0;
+    }
+
+    // Agrega una carga creada afuera (agregacion)
+    void agregarCarga(Carga* c) {
+        if (numCargas < MAX_CARGAS) {
+            cargas[numCargas] = c;
+            numCargas++;
+        }
+    }
+
+    void mostrar() {
+        cout << fixed << setprecision(1);
+        cout << nombre << " | potencia contratada: " << POTENCIA_CONTRATADA << " kW" << endl;
+        for (int i = 0; i < numCargas; i++) {
+            cout << "  " << cargas[i]->getNombre() << " (" << cargas[i]->getPotencia() << " kW, "
+                 << (cargas[i]->esAplazable() ? "aplazable" : "critica") << ")" << endl;
+        }
+    }
+
+    // Opcion 2: que haria cada carga con una lectura (hora, precio, embalses)
+    void evaluar(int hora, float precio, float embalses) {
+        decidirCargas(hora, precio, embalses);
+
+        // Lo que pidio cada carga, antes de revisar la potencia contratada
+        for (int i = 0; i < numCargas; i++) {
+            cout << "  " << setw(22) << left << cargas[i]->getNombre() << right
+                 << (cargas[i]->estaEncendida() ? "ENCENDER" : "APLAZAR") << endl;
+        }
+
+        // El motivo de la decision
+        if (embalses < NIVEL_ALERTA_EMBALSES) {
+            cout << "ALERTA: riesgo de racionamiento: solo funciona la carga critica" << endl;
+        }
+        if (hora >= PICO_INICIO && hora <= PICO_FIN) {
+            cout << "Hora pico: se aplazan las cargas aplazables" << endl;
+        }
+        if (precio > PRECIO_CARO) {
+            cout << "Energia cara: se aplazan las cargas aplazables" << endl;
+        }
+
+        // Regla 6
+        cout << fixed << setprecision(1);
+        float potenciaPedida = potenciaEncendida();
+        Carga* apagada = aplicarRegla6();
+        if (apagada != nullptr) {
+            cout << "ALERTA: " << potenciaPedida << " kW superan la potencia contratada ("
+                 << POTENCIA_CONTRATADA << " kW). Se apaga " << apagada->getNombre() << endl;
+        }
+        cout << "Potencia encendida: " << potenciaEncendida() << " kW de "
+             << POTENCIA_CONTRATADA << " kW contratados" << endl;
+    }
+
+    // Opcion 3: simula 24 horas con gestor y calcula el costo sin gestor
+    void simularDia() {
+        // Todo empieza de nuevo: asi el resumen cuenta solo esta simulacion
+        medidor.reiniciar();
+        for (int i = 0; i < numCargas; i++) {
+            cargas[i]->reiniciarDia();
+        }
+        horasSimuladas = 0; fallas = 0; alertasPotencia = 0; turnosCedidos = 0;
+        emergencia = false;
+
+        cout << fixed << setprecision(0);
+        if (mercado->getNivelEmbalses() < NIVEL_ALERTA_EMBALSES) {
+            cout << "ALERTA: embalses al " << mercado->getNivelEmbalses()
+                 << " %: riesgo de racionamiento, solo funciona la carga critica" << endl;
+        }
+
+        // Encabezado: una columna por carga, con su nombre recortado
+        cout << setw(5) << "Hora" << setw(8) << "Precio" << setw(6) << "Emb%";
+        for (int i = 0; i < numCargas; i++) {
+            cout << setw(12) << cargas[i]->getNombre().substr(0, LETRAS_COLUMNA);
+        }
+        cout << setw(6) << "kW" << setw(8) << "Costo" << endl;
+
+        for (int h = 0; h < HORAS_DIA; h++) {
+            // ASOCIACION: el negocio le pide los datos de esta hora al mercado
+            float precio = mercado->precioHora(h);
+            float embalses = mercado->getNivelEmbalses();
+
+            // continue: fallo la lectura del precio. El controlador no lo conoce, asi que
+            // solo deja la carga critica; la factura de esa hora si se paga al precio real
+            if (rand() % FALLA_CADA == 0) {
+                dejarSoloCritica();
+                cerrarHora(precio);
+                fallas++;
+                cout << setw(5) << h << setw(8) << "--" << setw(6) << embalses
+                     << "  falla de lectura: solo la carga critica" << endl;
+                continue;
+            }
+
+            // break: energia en escasez y embalses bajos a la vez. Termina la simulacion
+            if (precio > PRECIO_EMERGENCIA && embalses < NIVEL_ALERTA_EMBALSES) {
+                emergencia = true;
+                horaEmergencia = h;
+                cout << setw(5) << h << setw(8) << precio << setw(6) << embalses
+                     << "  EMERGENCIA DE RACIONAMIENTO: termina la simulacion" << endl;
+                break;
+            }
+
+            // Cada carga decide, y despues se revisa la potencia contratada
+            decidirCargas(h, precio, embalses);
+            Carga* cedio = cederTurno();
+            if (cedio != nullptr) turnosCedidos++;
+            Carga* apagada = aplicarRegla6();
+            if (apagada != nullptr) alertasPotencia++;
+
+            float kwEncendidos = potenciaEncendida();
+            float costoHora = cerrarHora(precio);
+
+            cout << setw(5) << h << setw(8) << precio << setw(6) << embalses;
+            for (int i = 0; i < numCargas; i++) {
+                cout << setw(12) << (cargas[i]->estaEncendida() ? "ON" : "off");
+            }
+            cout << setw(6) << setprecision(1) << kwEncendidos
+                 << setw(8) << setprecision(0) << costoHora;
+            if (apagada != nullptr) cout << "  ALERTA potencia: apaga " << apagada->getNombre();
+            if (cedio != nullptr) cout << "  turno: cede " << cedio->getNombre();
+            cout << endl;
+        }
+
+        cout << "Simulacion terminada. Vea el resumen con la opcion 4." << endl;
+        mostrarProduccionIncompleta();
+    }
+
+    // Opcion 4: resumen y ahorro de la ultima simulacion
+    void resumen() {
+        cout << fixed << setprecision(1);
+        cout << nombre << endl;
+        cout << "Horas simuladas: " << horasSimuladas << " de " << HORAS_DIA
+             << " | fallas de lectura: " << fallas << endl;
+        cout << "Alertas de potencia: " << alertasPotencia
+             << " | turnos cedidos: " << turnosCedidos << endl;
+        if (emergencia) {
+            cout << "EMERGENCIA DE RACIONAMIENTO a las " << horaEmergencia << " h" << endl;
+        }
+
+        for (int i = 0; i < numCargas; i++) {
+            cout << "  " << setw(22) << left << cargas[i]->getNombre() << right
+                 << setw(3) << cargas[i]->getHorasUso() << " h" << setw(8) << cargas[i]->kwhUsados() << " kWh";
+            if (cargas[i]->esAplazable()) {
+                cout << "  (minimo " << cargas[i]->getHorasMinimas() << " h)";
+            }
+            cout << endl;
+        }
+        cout << "Energia con gestor: " << medidor.getKwhConGestor() << " kWh" << endl;
+        cout << "Energia sin gestor: " << medidor.getKwhSinGestor() << " kWh" << endl;
+
+        float costoCon = medidor.getCostoConGestor();
+        float costoSin = medidor.getCostoSinGestor();
+        cout << setprecision(0);
+        cout << "Costo con gestor: $" << costoCon << endl;
+        cout << "Costo sin gestor: $" << costoSin << endl;
+        cout << "Ahorro:           $" << costoSin - costoCon;
+        // Solo si costoSin > 0, para no dividir por 0
+        if (costoSin > 0) {
+            cout << " (" << setprecision(1) << (costoSin - costoCon) / costoSin * 100 << " %)";
+        }
+        cout << endl;
+        mostrarProduccionIncompleta();
+    }
+};
+
+// Prueba del negocio: las cargas se crean afuera y se simula un dia
 int main() {
     srand(SEMILLA);
     Mercado mercado(EMBALSES_INICIAL);
-    Medidor medidor;
+    CargaCritica refrigeradores("Refrigeradores", POTENCIA_REFRIGERADORES);
+    CargaAplazable aire("Aire acondicionado", POTENCIA_AIRE, HORAS_MIN_AIRE);
+    CargaAplazable calentador("Calentador de agua", POTENCIA_CALENTADOR, HORAS_MIN_CALENTADOR);
 
-    for (int h = 0; h < HORAS_DIA; h++) {
-        float precio = mercado.precioHora(h);
-        medidor.registrarSinGestor(POTENCIA_REFRIGERADORES, precio);
-        cout << h << " h: " << precio << endl;
-    }
-    cout << "Costo de los refrigeradores: " << medidor.getCostoSinGestor() << endl;
+    Negocio negocio("Minimercado El Ahorro", &mercado);
+    negocio.agregarCarga(&refrigeradores);
+    negocio.agregarCarga(&aire);
+    negocio.agregarCarga(&calentador);
+    negocio.mostrar();
+    negocio.simularDia();
+    negocio.resumen();
     return 0;
 }
