@@ -546,20 +546,113 @@ public:
     }
 };
 
-// Prueba del negocio: las cargas se crean afuera y se simula un dia
+// Revisa la lectura que acaba de hacer cin y descarta el resto de la linea.
+// Devuelve false si se escribieron letras o sobra algo despues del numero (12abc, 7.5 en la hora)
+bool lecturaCorrecta() {
+    bool correcta = !cin.fail() && (cin.peek() == '\n' || cin.eof());
+    // Se termino la entrada: no hay nada mas que leer
+    if (cin.fail() && cin.eof()) {
+        cout << endl << "Fin de la entrada." << endl;
+        exit(0);
+    }
+    // clear() quita el error de cin; ignore() bota lo que quedo escrito en esa linea
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    return correcta;
+}
+
+// main: el programa empieza a ejecutarse aqui
 int main() {
     srand(SEMILLA);
+
+    // El mercado existe por su cuenta: no es parte del negocio
     Mercado mercado(EMBALSES_INICIAL);
+
+    // Las cargas se crean afuera del negocio
     CargaCritica refrigeradores("Refrigeradores", POTENCIA_REFRIGERADORES);
     CargaAplazable aire("Aire acondicionado", POTENCIA_AIRE, HORAS_MIN_AIRE);
     CargaAplazable calentador("Calentador de agua", POTENCIA_CALENTADOR, HORAS_MIN_CALENTADOR);
 
+    // Le pasa la direccion del mercado (asociacion) y le agrega las cargas (agregacion)
     Negocio negocio("Minimercado El Ahorro", &mercado);
     negocio.agregarCarga(&refrigeradores);
     negocio.agregarCarga(&aire);
     negocio.agregarCarga(&calentador);
     negocio.mostrar();
-    negocio.simularDia();
-    negocio.resumen();
+
+    // Lectura manual: empieza con valores de ejemplo
+    int hora = HORA_EJEMPLO;
+    float precio = PRECIO_EJEMPLO;
+    float embalses = EMBALSES_INICIAL;
+    bool haySimulacion = false;
+    int opcion;
+    // true cuando el dato que acaba de escribir el usuario es valido
+    bool valido;
+
+    do {
+        cout << endl << "===== WattControl v2 - Minimercado =====" << endl;
+        cout << "1. Ingresar lectura manual (hora, precio, embalses)" << endl;
+        cout << "2. Evaluar decision de cada carga" << endl;
+        cout << "3. Simular un dia completo (24 h)" << endl;
+        cout << "4. Ver resumen de la ultima simulacion" << endl;
+        cout << "0. Salir" << endl;
+        cout << "Opcion: ";
+        cin >> opcion;
+        // Si escribio letras, la opcion queda en un valor que cae en el default
+        if (!lecturaCorrecta()) opcion = -1;
+
+        switch (opcion) {
+        case 1:
+            do {
+                cout << "Hora (" << HORA_MINIMA << " a " << HORA_MAXIMA << "): ";
+                cin >> hora;
+                valido = lecturaCorrecta() && hora >= HORA_MINIMA && hora <= HORA_MAXIMA;
+                if (!valido) cout << "  Hora invalida." << endl;
+            } while (!valido);
+            do {
+                cout << "Precio de bolsa (COP/kWh): ";
+                cin >> precio;
+                valido = lecturaCorrecta() && precio > 0;
+                if (!valido) cout << "  El precio debe ser mayor que 0." << endl;
+            } while (!valido);
+            do {
+                cout << fixed << setprecision(0);
+                cout << "Nivel de los embalses (" << EMBALSES_MINIMO << " a " << EMBALSES_MAXIMO << " %): ";
+                cin >> embalses;
+                valido = lecturaCorrecta() && embalses >= EMBALSES_MINIMO && embalses <= EMBALSES_MAXIMO;
+                if (!valido) cout << "  Nivel de embalses invalido." << endl;
+            } while (!valido);
+            // El mercado guarda el dato: la opcion 3 simula con este nivel de embalses
+            mercado.setNivelEmbalses(embalses);
+            cout << "Lectura guardada." << endl;
+            break;
+        case 2:
+            cout << fixed << setprecision(0);
+            cout << "Hora " << hora << " | precio " << precio
+                 << " | embalses " << embalses << " %" << endl;
+            negocio.evaluar(hora, precio, embalses);
+            break;
+        case 3:
+            negocio.simularDia();
+            haySimulacion = true;
+            break;
+        case 4:
+            if (haySimulacion) negocio.resumen();
+            else cout << "Primero simule un dia con la opcion 3." << endl;
+            break;
+        case 0:
+            cout << "Hasta luego." << endl;
+            break;
+        default:
+            cout << "Opcion invalida." << endl;
+        }
+
+        // Pausa para leer el resultado antes de volver a mostrar el menu
+        if (opcion != 0) {
+            cout << endl << "Presione Enter para continuar...";
+            cin.get();
+        }
+    } while (opcion != 0);
+
     return 0;
 }
