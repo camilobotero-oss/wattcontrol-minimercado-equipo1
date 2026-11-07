@@ -1,0 +1,5 @@
+# Archivos que Git no sube a GitHub
+# El programa compilado: cada quien lo crea al compilar
+*.exe
+# La configuracion de VS Code de cada computador
+.vscode/
