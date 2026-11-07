@@ -1,0 +1,106 @@
+Minimercado El Ahorro | potencia contratada: 7.0 kW
+  Refrigeradores (2.5 kW, critica)
+  Aire acondicionado (3.5 kW, aplazable)
+  Calentador de agua (2.0 kW, aplazable)
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 3
+ Hora  Precio  Emb%  Refrigerad  Aire acond  Calentador    kW   Costo
+    0     491    78          ON         off          ON   4.5    2210  ALERTA potencia: apaga Aire acondicionado
+    1     461    78          ON         off          ON   4.5    2074  ALERTA potencia: apaga Aire acondicionado
+    2     597    78          ON         off          ON   4.5    2686  ALERTA potencia: apaga Aire acondicionado
+    3     534    78          ON          ON         off   6.0    3204  turno: cede Calentador de agua
+    4     398    78          ON          ON         off   6.0    2388  turno: cede Calentador de agua
+    5     533    78          ON          ON         off   6.0    3198  turno: cede Calentador de agua
+    6     576    78          ON          ON         off   6.0    3456  turno: cede Calentador de agua
+    7     928    78          ON         off         off   2.5    2320
+    8     951    78          ON         off         off   2.5    2378
+    9     951    78          ON         off         off   2.5    2378
+   10     617    78          ON          ON         off   6.0    3702  turno: cede Calentador de agua
+   11     679    78          ON          ON         off   6.0    4074  turno: cede Calentador de agua
+   12     615    78          ON          ON         off   6.0    3690  turno: cede Calentador de agua
+   13     901    78          ON         off         off   2.5    2252
+   14     664    78          ON          ON         off   6.0    3984  turno: cede Calentador de agua
+   15     851    78          ON         off         off   2.5    2128
+   16     892    78          ON         off         off   2.5    2230
+   17     886    78          ON         off         off   2.5    2215
+   18    1394    78          ON         off         off   2.5    3485
+   19    1466    78          ON         off         off   2.5    3665
+   20    1208    78          ON         off         off   2.5    3020
+   21     910    78          ON         off         off   2.5    2275
+   22     915    78          ON         off         off   2.5    2288
+   23     776    78          ON         off          ON   4.5    3492  ALERTA potencia: apaga Aire acondicionado
+Simulacion terminada. Vea el resumen con la opcion 4.
+
+Presione Enter para continuar...
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 3
+ Hora  Precio  Emb%  Refrigerad  Aire acond  Calentador    kW   Costo
+    0     497    78          ON         off          ON   4.5    2236  ALERTA potencia: apaga Aire acondicionado
+    1     547    78          ON         off          ON   4.5    2462  ALERTA potencia: apaga Aire acondicionado
+    2     429    78          ON         off          ON   4.5    1930  ALERTA potencia: apaga Aire acondicionado
+    3     472    78          ON          ON         off   6.0    2832  turno: cede Calentador de agua
+    4     545    78          ON          ON         off   6.0    3270  turno: cede Calentador de agua
+    5     632    78          ON          ON         off   6.0    3792  turno: cede Calentador de agua
+    6     566    78          ON          ON         off   6.0    3396  turno: cede Calentador de agua
+    7     787    78          ON          ON         off   6.0    4722  turno: cede Calentador de agua
+    8     554    78          ON          ON         off   6.0    3324  turno: cede Calentador de agua
+    9     666    78          ON          ON         off   6.0    3996  turno: cede Calentador de agua
+   10     639    78          ON          ON         off   6.0    3834  turno: cede Calentador de agua
+   11     963    78          ON         off         off   2.5    2408
+   12     752    78          ON         off          ON   4.5    3384  ALERTA potencia: apaga Aire acondicionado
+   13     548    78          ON         off          ON   4.5    2466  ALERTA potencia: apaga Aire acondicionado
+   14     962    78          ON         off         off   2.5    2405
+   15      --    78  falla de lectura: solo la carga critica
+   16     738    78          ON         off          ON   4.5    3321  ALERTA potencia: apaga Aire acondicionado
+   17     984    78          ON         off         off   2.5    2460
+   18    1243    78          ON         off         off   2.5    3108
+   19    1077    78          ON         off         off   2.5    2692
+   20    1527    78          ON         off         off   2.5    3818
+   21     915    78          ON         off         off   2.5    2288
+   22     753    78          ON         off          ON   4.5    3388  ALERTA potencia: apaga Aire acondicionado
+   23     588    78          ON         off          ON   4.5    2646  ALERTA potencia: apaga Aire acondicionado
+Simulacion terminada. Vea el resumen con la opcion 4.
+
+Presione Enter para continuar...
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 4
+Minimercado El Ahorro
+Horas simuladas: 24 de 24 | fallas de lectura: 1
+Alertas de potencia: 8 | turnos cedidos: 8
+  Refrigeradores         24 h    60.0 kWh
+  Aire acondicionado      8 h    28.0 kWh  (minimo 8 h)
+  Calentador de agua      8 h    16.0 kWh  (minimo 3 h)
+Energia con gestor: 104.0 kWh
+Energia sin gestor: 192.0 kWh
+Costo con gestor: $72425
+Costo sin gestor: $146264
+Ahorro:           $73839 (50.5 %)
+
+Presione Enter para continuar...
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 0
+Hasta luego.

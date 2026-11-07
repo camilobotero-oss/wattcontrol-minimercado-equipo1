@@ -1,0 +1,126 @@
+Minimercado El Ahorro | potencia contratada: 7.0 kW
+  Refrigeradores (2.5 kW, critica)
+  Aire acondicionado (3.5 kW, aplazable)
+  Calentador de agua (2.0 kW, aplazable)
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 1
+Hora (0 a 23): 12
+Precio de bolsa (COP/kWh): 500
+Nivel de los embalses (0 a 100 %): 35
+Lectura guardada.
+
+Presione Enter para continuar...
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 3
+ALERTA: embalses al 35 %: riesgo de racionamiento, solo funciona la carga critica
+ Hora  Precio  Emb%  Refrigerad  Aire acond  Calentador    kW   Costo
+    0     491    35          ON         off         off   2.5    1228
+    1     461    35          ON         off         off   2.5    1152
+    2     597    35          ON         off         off   2.5    1492
+    3     534    35          ON         off         off   2.5    1335
+    4     398    35          ON         off         off   2.5     995
+    5     533    35          ON         off         off   2.5    1332
+    6     576    35          ON         off         off   2.5    1440
+    7     928    35          ON         off         off   2.5    2320
+    8     951    35          ON         off         off   2.5    2378
+    9     951    35          ON         off         off   2.5    2378
+   10     617    35          ON         off         off   2.5    1542
+   11     679    35          ON         off         off   2.5    1698
+   12     615    35          ON         off         off   2.5    1538
+   13     901    35          ON         off         off   2.5    2252
+   14     664    35          ON         off         off   2.5    1660
+   15     851    35          ON         off         off   2.5    2128
+   16     892    35          ON         off         off   2.5    2230
+   17     886    35          ON         off         off   2.5    2215
+   18    1394    35          ON         off         off   2.5    3485
+   19    1466    35          ON         off         off   2.5    3665
+   20    1208    35          ON         off         off   2.5    3020
+   21     910    35          ON         off         off   2.5    2275
+   22     915    35          ON         off         off   2.5    2288
+   23     776    35          ON         off         off   2.5    1940
+Simulacion terminada. Vea el resumen con la opcion 4.
+ALERTA: produccion incompleta - Aire acondicionado: 0 h de 8 h minimas
+ALERTA: produccion incompleta - Calentador de agua: 0 h de 3 h minimas
+
+Presione Enter para continuar...
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 3
+ALERTA: embalses al 35 %: riesgo de racionamiento, solo funciona la carga critica
+ Hora  Precio  Emb%  Refrigerad  Aire acond  Calentador    kW   Costo
+    0     497    35          ON         off         off   2.5    1242
+    1     547    35          ON         off         off   2.5    1368
+    2     429    35          ON         off         off   2.5    1072
+    3     472    35          ON         off         off   2.5    1180
+    4     545    35          ON         off         off   2.5    1362
+    5     632    35          ON         off         off   2.5    1580
+    6     566    35          ON         off         off   2.5    1415
+    7     787    35          ON         off         off   2.5    1968
+    8     554    35          ON         off         off   2.5    1385
+    9     666    35          ON         off         off   2.5    1665
+   10     639    35          ON         off         off   2.5    1598
+   11     963    35          ON         off         off   2.5    2408
+   12     752    35          ON         off         off   2.5    1880
+   13     548    35          ON         off         off   2.5    1370
+   14     962    35          ON         off         off   2.5    2405
+   15      --    35  falla de lectura: solo la carga critica
+   16     738    35          ON         off         off   2.5    1845
+   17     984    35          ON         off         off   2.5    2460
+   18    1243    35          ON         off         off   2.5    3108
+   19    1077    35          ON         off         off   2.5    2692
+   20    1527    35  EMERGENCIA DE RACIONAMIENTO: termina la simulacion
+Simulacion terminada. Vea el resumen con la opcion 4.
+ALERTA: produccion incompleta - Aire acondicionado: 0 h de 8 h minimas
+ALERTA: produccion incompleta - Calentador de agua: 0 h de 3 h minimas
+
+Presione Enter para continuar...
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 4
+Minimercado El Ahorro
+Horas simuladas: 20 de 24 | fallas de lectura: 1
+Alertas de potencia: 0 | turnos cedidos: 0
+EMERGENCIA DE RACIONAMIENTO a las 20 h
+  Refrigeradores         20 h    50.0 kWh
+  Aire acondicionado      0 h     0.0 kWh  (minimo 8 h)
+  Calentador de agua      0 h     0.0 kWh  (minimo 3 h)
+Energia con gestor: 50.0 kWh
+Energia sin gestor: 160.0 kWh
+Costo con gestor: $36250
+Costo sin gestor: $116000
+Ahorro:           $79750 (68.8 %)
+ALERTA: produccion incompleta - Aire acondicionado: 0 h de 8 h minimas
+ALERTA: produccion incompleta - Calentador de agua: 0 h de 3 h minimas
+
+Presione Enter para continuar...
+
+===== WattControl v2 - Minimercado =====
+1. Ingresar lectura manual (hora, precio, embalses)
+2. Evaluar decision de cada carga
+3. Simular un dia completo (24 h)
+4. Ver resumen de la ultima simulacion
+0. Salir
+Opcion: 0
+Hasta luego.
